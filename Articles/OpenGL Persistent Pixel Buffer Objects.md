@@ -15,7 +15,7 @@ The general algorithm is as follows:
 5. On the fourth frame, before writing to section 1 of the buffer, you must check the sync object to see if it has been completed before you can start writing.
 
 > [!WARNING]
-> ⚠️ You must keep each section’s sync object separate!
+> You must keep each section’s sync object separate!
 
 Here is a pseudo-code adapting the above algorithm for writing color data to the PBO and copying its data to a texture it as a texture to be used in drawing a textured quad.
 
@@ -53,7 +53,7 @@ void *buffer = glMapNamedBufferRange(pbo_handle, 0, DATA_SIZE_BYTES * 3, flags))
 ```
 
 > [!NOTE]
-> 💡 The `GL_MAP_COHERENT_BIT` flag automatically makes your changes in the memory visible to the GPU. Without this flag, you have to set a memory barrier manually. See Easy Synchronization on the [OpenGL Wiki](https://www.khronos.org/opengl/wiki/Buffer_Object#Persistent_mapping) for more information.
+> The `GL_MAP_COHERENT_BIT` flag automatically makes your changes in the memory visible to the GPU. Without this flag, you have to set a memory barrier manually. See Easy Synchronization on the [OpenGL Wiki](https://www.khronos.org/opengl/wiki/Buffer_Object#Persistent_mapping) for more information.
 
 
 # Releasing the PBO
@@ -99,10 +99,10 @@ void init() {
 	
 	glCreateBuffers(1, &pbo_handle);
 	constexpr GLbitfield flags = GL_MAP_WRITE_BIT | 
-															 GL_MAP_PERSISTENT_BIT |
-															 GL_MAP_COHERENT_BIT;
+								 GL_MAP_PERSISTENT_BIT |
+								 GL_MAP_COHERENT_BIT;
 	glNamedBufferStorage(pbo_handle, PIXEL_COUNT_BTYES * 3, nullptr, flags);
-	data = (Color*)glMapNamedBufferRange(pbo_handle, 0, PIXEL_COUNT_BTYES * 3, flags));
+	data = (Color*)glMapNamedBufferRange(pbo_handle, 0, PIXEL_COUNT_BTYES * 3, flags);
 	
 	glCreateTextures(GL_TEXTURE_2D, 1, &tex_handle);
 	glTextureStorage2D(tex_handle, 1, GL_RGBA8, TEX_WIDHT, TEX_HEIGHT);
