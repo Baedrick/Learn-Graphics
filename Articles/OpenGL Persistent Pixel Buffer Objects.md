@@ -24,17 +24,17 @@ data = create_buffer_and_map_range()
 buffer_id = 0
 
 fn update:
-	wait_for_sync(buffer_id)
-	
-	for each pixel in data do:
-		pixel = white_color
-	
-	tex_id = copy_data_to_texture(data, buffer_id)
-	
-	draw_quad_with_texture(tex_id)
-	
-	place_fence(buffer_id)
-	buffer_id = (buffer_id + 1) mod 3
+    wait_for_sync(buffer_id)
+    
+    for each pixel in data do:
+        pixel = white_color
+    
+    tex_id = copy_data_to_texture(data, buffer_id)
+    
+    draw_quad_with_texture(tex_id)
+    
+    place_fence(buffer_id)
+    buffer_id = (buffer_id + 1) mod 3
 ```
 
 # Creating a PBO
@@ -71,19 +71,19 @@ This code snippet demonstrates how to write color data for an OpenGL texture obj
 
 ```cpp
 enum {
-	TEX_WIDTH = 32,
-	TEX_HEIGHT = 32,
-	PIXEL_COUNT = TEX_WIDTH * TEX_HEIGHT,
-	PIXEL_COUNT_BTYES = PIXEL_COUNT * 4 // 4 bytes per pixel
+    TEX_WIDTH = 32,
+    TEX_HEIGHT = 32,
+    PIXEL_COUNT = TEX_WIDTH * TEX_HEIGHT,
+    PIXEL_COUNT_BTYES = PIXEL_COUNT * 4 // 4 bytes per pixel
 };
 
 struct Color {
-	unsigned char r, g, b, a;
+    unsigned char r, g, b, a;
 };
 
 struct BufferRange {
-	uintptr_t offset;
-	GLsync sync;
+    uintptr_t offset;
+    GLsync sync;
 } buffer_ranges[3];
 
 GLuint pbo_handle;
@@ -92,59 +92,59 @@ Color *data;
 unsigned char buffer_id;
 
 void init() {
-	buffer_id = 0;
-	buffer_ranges[0].offset = 0;
-	buffer_ranges[1].offset = DATA_SIZE;
-	buffer_ranges[2].offset = DATA_SIZE * 2;
-	
-	glCreateBuffers(1, &pbo_handle);
-	constexpr GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-	glNamedBufferStorage(pbo_handle, PIXEL_COUNT_BTYES * 3, nullptr, flags);
-	data = (Color*)glMapNamedBufferRange(pbo_handle, 0, PIXEL_COUNT_BTYES * 3, flags);
-	
-	glCreateTextures(GL_TEXTURE_2D, 1, &tex_handle);
-	glTextureStorage2D(tex_handle, 1, GL_RGBA8, TEX_WIDHT, TEX_HEIGHT);
+    buffer_id = 0;
+    buffer_ranges[0].offset = 0;
+    buffer_ranges[1].offset = DATA_SIZE;
+    buffer_ranges[2].offset = DATA_SIZE * 2;
+    
+    glCreateBuffers(1, &pbo_handle);
+    constexpr GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+    glNamedBufferStorage(pbo_handle, PIXEL_COUNT_BTYES * 3, nullptr, flags);
+    data = (Color*)glMapNamedBufferRange(pbo_handle, 0, PIXEL_COUNT_BTYES * 3, flags);
+    
+    glCreateTextures(GL_TEXTURE_2D, 1, &tex_handle);
+    glTextureStorage2D(tex_handle, 1, GL_RGBA8, TEX_WIDHT, TEX_HEIGHT);
 }
 
 void update() {
-	// Wait for fence
-	GLsync &sync = buffer_ranges[buffer_id].sync;
-	if (sync) {
-		while (true) {
-			GLenum const result = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 1);
-			if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED)
-				return;
-		}
-	}
-	
-	// Write color data to buffer
-	Color *buffer = data + buffer_sections[buffer_id].offset;
-	for (unsigned int i = 0; i < PIXEL_COUNT; ++i) {
-		buffer[I] = Color{ 255, 255, 255, 255 };
-	}
-	
-	// Copy PBO data to texture
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_handle);
-	glTextureSubImage2D(
-		tex_handle, 0, 0, 0, TEX_WIDTH, TEX_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE,
-		(void*)buffer_sections[buffer_id].offset * sizeof(Color));
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-	
-	// Draw something here with the texture.
-	/* drawing code... */
-	
-	// Place fence
-	if (sync)
-		glDeleteSync(sync);
-	sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-	buffer_id = (buffer_id + 1) % 3;
+    // Wait for fence
+    GLsync &sync = buffer_ranges[buffer_id].sync;
+    if (sync) {
+        while (true) {
+            GLenum const result = glClientWaitSync(sync, GL_SYNC_FLUSH_COMMANDS_BIT, 1);
+            if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED)
+                return;
+        }
+    }
+    
+    // Write color data to buffer
+    Color *buffer = data + buffer_sections[buffer_id].offset;
+    for (unsigned int i = 0; i < PIXEL_COUNT; ++i) {
+        buffer[I] = Color{ 255, 255, 255, 255 };
+    }
+    
+    // Copy PBO data to texture
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_handle);
+    glTextureSubImage2D(
+        tex_handle, 0, 0, 0, TEX_WIDTH, TEX_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE,
+        (void*)buffer_sections[buffer_id].offset * sizeof(Color));
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    
+    // Draw something here with the texture.
+    /* drawing code... */
+    
+    // Place fence
+    if (sync)
+        glDeleteSync(sync);
+    sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    buffer_id = (buffer_id + 1) % 3;
 }
 
 void clean_up() {
-	glDeleteTextures(1, &tex_handle);
+    glDeleteTextures(1, &tex_handle);
 
-	glUnmapNamedBuffer(pbo_handle);
-	glDeleteBuffers(1, &pbo_handle);
+    glUnmapNamedBuffer(pbo_handle);
+    glDeleteBuffers(1, &pbo_handle);
 }
 ```
 
