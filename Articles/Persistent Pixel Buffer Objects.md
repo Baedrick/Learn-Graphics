@@ -94,14 +94,14 @@ unsigned char buffer_id;
 void init() {
     buffer_id = 0;
     buffer_ranges[0].offset = 0;
-    buffer_ranges[1].offset = DATA_SIZE;
-    buffer_ranges[2].offset = DATA_SIZE * 2;
-    
+    buffer_ranges[1].offset = PIXEL_COUNT * sizeof(Color);
+    buffer_ranges[2].offset = PIXEL_COUNT * 2 * sizeof(Color);
+
     glCreateBuffers(1, &pbo_handle);
     constexpr GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
     glNamedBufferStorage(pbo_handle, PIXEL_COUNT_BTYES * 3, nullptr, flags);
     data = (Color*)glMapNamedBufferRange(pbo_handle, 0, PIXEL_COUNT_BTYES * 3, flags);
-    
+
     glCreateTextures(GL_TEXTURE_2D, 1, &tex_handle);
     glTextureStorage2D(tex_handle, 1, GL_RGBA8, TEX_WIDHT, TEX_HEIGHT);
 }
@@ -116,23 +116,23 @@ void update() {
                 return;
         }
     }
-    
+
     // Write color data to buffer
     Color *buffer = data + buffer_sections[buffer_id].offset;
     for (unsigned int i = 0; i < PIXEL_COUNT; ++i) {
-        buffer[I] = Color{ 255, 255, 255, 255 };
+        buffer[i] = Color{ 255, 255, 255, 255 };
     }
     
     // Copy PBO data to texture
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_handle);
     glTextureSubImage2D(
         tex_handle, 0, 0, 0, TEX_WIDTH, TEX_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE,
-        (void*)buffer_sections[buffer_id].offset * sizeof(Color));
+        (void*)buffer_sections[buffer_id].offset);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    
+
     // Draw something here with the texture.
     /* drawing code... */
-    
+
     // Place fence
     if (sync)
         glDeleteSync(sync);
