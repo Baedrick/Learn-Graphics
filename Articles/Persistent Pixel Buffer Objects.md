@@ -1,4 +1,4 @@
-# OpenGL Persistent Pixel Buffer Objects
+# Persistent Pixel Buffer Objects
 
 # Introduction
 
