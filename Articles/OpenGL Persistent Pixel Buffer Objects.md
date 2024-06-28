@@ -98,9 +98,7 @@ void init() {
 	buffer_ranges[2].offset = DATA_SIZE * 2;
 	
 	glCreateBuffers(1, &pbo_handle);
-	constexpr GLbitfield flags = GL_MAP_WRITE_BIT | 
-								 GL_MAP_PERSISTENT_BIT |
-								 GL_MAP_COHERENT_BIT;
+	constexpr GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 	glNamedBufferStorage(pbo_handle, PIXEL_COUNT_BTYES * 3, nullptr, flags);
 	data = (Color*)glMapNamedBufferRange(pbo_handle, 0, PIXEL_COUNT_BTYES * 3, flags);
 	
