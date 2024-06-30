@@ -17,7 +17,7 @@ The general algorithm is as follows:
 > [!WARNING]
 > You must keep each section’s sync object separate!
 
-Here is a pseudo-code adapting the above algorithm for writing color data to the PBO and copying its data to a texture it as a texture to be used in drawing a textured quad.
+Here is a pseudo-code adapting the above algorithm for writing color data to the PBO and copying its data to a texture to be used in drawing a textured quad.
 
 ```
 data = create_buffer_and_map_range()
@@ -26,7 +26,7 @@ buffer_id = 0
 fn update:
     wait_for_sync(buffer_id)
     
-    for each pixel in data do:
+    for each pixel in data(buffer_id) do:
         pixel = white_color
     
     tex_id = copy_data_to_texture(data, buffer_id)
