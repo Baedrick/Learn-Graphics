@@ -57,7 +57,7 @@ for each vertex_key in vertex_mapping:
 return positions, tex_coords, normals, indices
 ```
 
-> [!NOTE]
+> [!TIP]
 > [Euler's Characteristic](https://en.wikipedia.org/wiki/Euler_characteristic) states that large (closed) triangular meshes typically have twice as many triangles as vertices. Therefore, the starting capacity of `vertex_mapping` can be estimated as `indices / 2`.
 
 # Example
