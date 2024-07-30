@@ -78,9 +78,9 @@ struct Key {
   int vt_index;
   int vn_index;
   bool operator==(Key const &other) const {
-	  return v_index == other.v_index &&
-	         vt_index == other.vt_index &&
-	         vn_index == other.vn_index;
+    return v_index == other.v_index &&
+           vt_index == other.vt_index &&
+           vn_index == other.vn_index;
   }
 };
 
