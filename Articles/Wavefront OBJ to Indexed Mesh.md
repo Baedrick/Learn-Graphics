@@ -108,7 +108,7 @@ Mesh ObjToIndexed(Obj const &obj) {
   std::unordered_map<Key, unsigned short, Hasher> vertices;
   std::vector<Key> vertex_mapping;
 
-  for (size_t i = 0; i < obj_v_indices.size(); ++i) {
+  for (size_t i = 0; i < obj.v_indices.size(); ++i) {
     Key const key{
       .v_index = obj.v_indices[i],
       .vt_index = obj.vt_indices[i],
