@@ -65,63 +65,70 @@ return positions, tex_coords, normals, indices
 This code snippet is an implementation of the above algorithm in C++.
 
 ```cpp
-// The following are outputs from a function that reads the OBJ file.
-std::vector<glm::vec3> obj_v;
-std::vector<glm::vec2> obj_vt;
-std::vector<glm::vec3> obj_vn;
-std::vector<int> obj_v_indices;
-std::vector<int> obj_vn_indices;
-std::vector<int> obj_vt_indices;
-
-struct Key {
-  int v_index;
-  int vt_index;
-  int vn_index;
-  bool operator==(Key const &other) const {
-    return v_index == other.v_index &&
-           vt_index == other.vt_index &&
-           vn_index == other.vn_index;
-  }
+struct Obj {
+  std::vector<glm::vec3> v;
+  std::vector<glm::vec2> vt;
+  std::vector<glm::vec3> vn;
+  std::vector<int> v_indices;
+  std::vector<int> vt_indices;
+  std::vector<int> vn_indices;
 };
 
-struct Hasher {
-  // https://stackoverflow.com/a/17017281
-  size_t operator()(Key const &key) const {
-    size_t result = 17;
-    result = result * 31 + std::hash<s32>()(key.v_index);
-    result = result * 31 + std::hash<s32>()(key.vn_index);
-    result = result * 31 + std::hash<s32>()(key.vt_index);
-    return result;
-  }
+struct Mesh {
+  std::vector<glm::vec3> positions;
+  std::vector<glm::vec2> tex_coords;
+  std::vector<glm::vec3> normals;
+  std::vector<unsigned short> indices;
 };
 
-std::unordered_map<Key, unsigned short, Hasher> vertices;
-std::vector<Key> vertex_mapping;
-std::vector<unsigned short> indices;
-
-for (size_t i = 0; i < obj_v_indices.size(); ++i) {
-  Key const key{
-    .v_index = obj_v_indices[i],
-    .vt_index = obj_vt_indices[i],
-    .vn_index = obj_vn_indices[i],
+Mesh ObjToIndexed(Obj const &obj) {
+  struct Key {
+    int v_index;
+    int vt_index;
+    int vn_index;
+    bool operator==(Key const &other) const {
+      return v_index == other.v_index &&
+             vt_index == other.vt_index &&
+             vn_index == other.vn_index;
+    }
   };
-  if (auto const it = vertices.find(key); it != std::end(vertices)) {
-    indices.push_back(it->second);
-  } else {
-    unsigned short const index = (unsigned short)vertex_mapping.size();
-    vertex_mapping.push_back(key);
-    vertices[key] = index;
-    indices.push_back(index);
+  
+  struct Hasher {
+    // https://stackoverflow.com/a/17017281
+    size_t operator()(Key const &key) const {
+      size_t result = 17;
+      result = result * 31 + std::hash<int>()(key.v_index);
+      result = result * 31 + std::hash<int>()(key.vn_index);
+      result = result * 31 + std::hash<int>()(key.vt_index);
+      return result;
+    }
+  };
+
+  Mesh mesh;
+  std::unordered_map<Key, unsigned short, Hasher> vertices;
+  std::vector<Key> vertex_mapping;
+
+  for (size_t i = 0; i < obj_v_indices.size(); ++i) {
+    Key const key{
+      .v_index = obj.v_indices[i],
+      .vt_index = obj.vt_indices[i],
+      .vn_index = obj.vn_indices[i]
+    };
+    if (auto const it = vertices.find(key); it != std::end(vertices)) {
+      mesh.indices.push_back(it->second);
+    } else {
+      unsigned short const index = (unsigned short)vertex_mapping.size();
+      vertex_mapping.push_back(key);
+      vertices[key] = index;
+      mesh.indices.push_back(index);
+    }
   }
-}
 
-std::vector<glm::vec3> positions;
-std::vector<glm::vec2> tex_coords;
-std::vector<glm::vec3> normals;
-
-for (size_t i = 0; i < vertex_mapping.size(); ++i) {
-  positions.push_back(obj_v[vertex_mapping[i].v_index]);
-  tex_coords.push_back(obj_vt[vertex_mapping[i].vt_index]);
-  normals.push_back(obj_vn[vertex_mapping[i].vn_index]);
+  for (size_t i = 0; i < vertex_mapping.size(); ++i) {
+    mesh.positions.push_back(obj.v[vertex_mapping[i].v_index]);
+    mesh.tex_coords.push_back(obj.vt[vertex_mapping[i].vt_index]);
+    mesh.normals.push_back(obj.vn[vertex_mapping[i].vn_index]);
+  }
+  return mesh;
 }
 ```
